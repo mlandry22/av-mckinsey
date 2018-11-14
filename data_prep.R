@@ -1,0 +1,81 @@
+setwd("/Users/mark/Documents/AV-mckinsey-20180309/models/")
+library(h2o)
+library(data.table)
+train<-fread("../input/train.csv")
+test<-fread("../input/test.csv")
+ss<-fread("../input/sample_submission_J0OjXLi_DDt3uQN.csv")
+challenge<-fread("../input/challenge_data.csv")
+
+train<-merge(train,challenge,by.x="challenge",by.y="challenge_ID")
+test<-merge(test,challenge,by.x="challenge",by.y="challenge_ID")
+
+train[,user_categories:=.N,.(user_id,category_id)]
+test[,user_categories:=.N,.(user_id,category_id)]
+train[,user_series:=.N,.(user_id,challenge_series_ID)]
+test[,user_series:=.N,.(user_id,challenge_series_ID)]
+
+try(load("trainUser.rd"))
+if(!exists("trainUser")){
+  trainUser<-train[,.(
+    c1=max(ifelse(challenge_sequence==1,challenge,""))
+    ,c2=max(ifelse(challenge_sequence==2,challenge,""))
+    ,c3=max(ifelse(challenge_sequence==3,challenge,""))
+    ,c4=max(ifelse(challenge_sequence==4,challenge,""))
+    ,c5=max(ifelse(challenge_sequence==5,challenge,""))
+    ,c6=max(ifelse(challenge_sequence==6,challenge,""))
+    ,c7=max(ifelse(challenge_sequence==7,challenge,""))
+    ,c8=max(ifelse(challenge_sequence==8,challenge,""))
+    ,c9=max(ifelse(challenge_sequence==9,challenge,""))
+    ,c10=max(ifelse(challenge_sequence==10,challenge,""))
+    ,c11=max(ifelse(challenge_sequence==11,challenge,""))
+    ,c12=max(ifelse(challenge_sequence==12,challenge,""))
+    ,c13=max(ifelse(challenge_sequence==13,challenge,""))
+    ,cat9=max(ifelse(challenge_sequence==9,category_id,""))
+    ,cat10=max(ifelse(challenge_sequence==10,category_id,""))
+    ,ser9=max(ifelse(challenge_sequence==9,challenge_series_ID,""))
+    ,ser10=max(ifelse(challenge_sequence==10,challenge_series_ID,""))
+    ,p1=sum(programming_language==1)
+    ,p2=sum(programming_language==2)
+    ,p3=sum(programming_language==3)
+    ,mostCommonSeries=max(user_series)
+    ,numSeries=uniqueN(challenge_series_ID)
+    ,mostCommonCategory=max(user_categories)
+    ,numCategories=uniqueN(category_id)
+  ),user_id]
+  save(trainUser,file="trainUser.rd")
+}
+
+try(load("testUser.rd"))
+if(!exists("testUser")){
+  testUser<-test[,.(
+    c1=max(ifelse(challenge_sequence==1,challenge,""))
+    ,c2=max(ifelse(challenge_sequence==2,challenge,""))
+    ,c3=max(ifelse(challenge_sequence==3,challenge,""))
+    ,c4=max(ifelse(challenge_sequence==4,challenge,""))
+    ,c5=max(ifelse(challenge_sequence==5,challenge,""))
+    ,c6=max(ifelse(challenge_sequence==6,challenge,""))
+    ,c7=max(ifelse(challenge_sequence==7,challenge,""))
+    ,c8=max(ifelse(challenge_sequence==8,challenge,""))
+    ,c9=max(ifelse(challenge_sequence==9,challenge,""))
+    ,c10=max(ifelse(challenge_sequence==10,challenge,""))
+    ,c11=max(ifelse(challenge_sequence==11,challenge,""))
+    ,c12=max(ifelse(challenge_sequence==12,challenge,""))
+    ,c13=max(ifelse(challenge_sequence==13,challenge,""))
+    ,cat9=max(ifelse(challenge_sequence==9,category_id,""))
+    ,cat10=max(ifelse(challenge_sequence==10,category_id,""))
+    ,ser9=max(ifelse(challenge_sequence==9,challenge_series_ID,""))
+    ,ser10=max(ifelse(challenge_sequence==10,challenge_series_ID,""))
+    ,p1=sum(programming_language==1)
+    ,p2=sum(programming_language==2)
+    ,p3=sum(programming_language==3)
+    ,mostCommonSeries=max(user_series)
+    ,numSeries=uniqueN(challenge_series_ID)
+    ,mostCommonCategory=max(user_categories)
+    ,numCategories=uniqueN(category_id)
+  ),user_id]
+  save(testUser,file="testUser.rd")
+}
+
+trainUser[,allCourses:=paste(c1,c2,c3,c4,c5,c6,c7,c8,c9,c10)]
+testUser[,allCourses:=paste(c1,c2,c3,c4,c5,c6,c7,c8,c9,c10)]
+
